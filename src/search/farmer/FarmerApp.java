@@ -22,7 +22,6 @@ import aima.core.search.uninformed.IterativeDeepeningSearch;
 import aima.core.search.uninformed.UniformCostSearch;
 import com.google.common.base.Functions;
 import edu.uci.ics.jung.algorithms.layout.PolarPoint;
-import edu.uci.ics.jung.algorithms.layout.RadialTreeLayout;
 import edu.uci.ics.jung.algorithms.layout.TreeLayout;
 import java.io.FileInputStream;
 import java.io.ObjectInput;
@@ -74,22 +73,18 @@ public class FarmerApp extends JApplet {
     static Forest<String, Integer> graph;
     VisualizationViewer<String, Integer> vv;
 
-    VisualizationServer.Paintable rings;
-
     String root;
 
     TreeLayout<String, Integer> treeLayout;
 
-    RadialTreeLayout<String, Integer> radialLayout;
-
     public static void main(String args[]) {
-//        FarmerWithBreadthFirstSearch();
+        FarmerWithBreadthFirstSearch();
 //        FarmerWithUniformCostSearch();
 //        FarmerWithDepthLimitedSearch(8);
-        FarmerWithIterativeDeepeningSearch();
-        //FarmerWithGreedyBestFirstSearchMisplacedTileHeuristic();
-        //FarmerWithGreedyBestFirstSearchManhattanHeuristic();
-        //FarmerWithAStarSearchMisplacedTileHeuristic();
+//        FarmerWithIterativeDeepeningSearch();
+//        FarmerWithGreedyBestFirstSearchMisplacedTileHeuristic();
+//       FarmerWithGreedyBestFirstSearchManhattanHeuristic();
+//        FarmerWithAStarSearchMisplacedTileHeuristic();
 //        FarmerWithAStarSearchManhattanHeuristic();
 //        FarmerWithDepthFirstSearch();
 
@@ -102,7 +97,6 @@ public class FarmerApp extends JApplet {
         frame.pack();
         frame.setVisible(true);
     }
-
     public static void readObj() {
         try {
             FileInputStream fis = new FileInputStream("tree.ser");
@@ -116,10 +110,9 @@ public class FarmerApp extends JApplet {
         System.out.println(graph.toString());
     }
 
+
     public FarmerApp() throws HeadlessException {
         treeLayout = new TreeLayout<String, Integer>(graph);
-        radialLayout = new RadialTreeLayout<String, Integer>(graph);
-        radialLayout.setSize(new Dimension(600, 600));
         vv = new VisualizationViewer<String, Integer>(treeLayout, new Dimension(600, 600));
         vv.setBackground(Color.white);
         vv.getRenderContext().setEdgeShapeTransformer(EdgeShape.line(graph));
@@ -127,7 +120,6 @@ public class FarmerApp extends JApplet {
 
         vv.setVertexToolTipTransformer(new ToStringLabeller());
         vv.getRenderContext().setArrowFillPaintTransformer(Functions.<Paint>constant(Color.lightGray));
-        rings = new Rings();
 
         Container content = getContentPane();
         final GraphZoomScrollPane panel = new GraphZoomScrollPane(vv);
@@ -152,29 +144,6 @@ public class FarmerApp extends JApplet {
                 scaler.scale(vv, 1 / 1.1f, vv.getCenter());
             }
         });
-        JToggleButton radial = new JToggleButton("Radial");
-        radial.addItemListener(new ItemListener() {
-
-            public void itemStateChanged(ItemEvent e) {
-                if (e.getStateChange() == ItemEvent.SELECTED) {
-
-                    LayoutTransition<String, Integer> lt
-                            = new LayoutTransition<String, Integer>(vv, treeLayout, radialLayout);
-                    Animator animator = new Animator(lt);
-                    animator.start();
-                    vv.getRenderContext().getMultiLayerTransformer().setToIdentity();
-                    vv.addPreRenderPaintable(rings);
-                } else {
-                    LayoutTransition<String, Integer> lt
-                            = new LayoutTransition<String, Integer>(vv, radialLayout, treeLayout);
-                    Animator animator = new Animator(lt);
-                    animator.start();
-                    vv.getRenderContext().getMultiLayerTransformer().setToIdentity();
-                    vv.removePreRenderPaintable(rings);
-                }
-                vv.repaint();
-            }
-        });
 
         JPanel scaleGrid = new JPanel(new GridLayout(1, 0));
         scaleGrid.setBorder(BorderFactory.createTitledBorder("Zoom"));
@@ -182,48 +151,9 @@ public class FarmerApp extends JApplet {
         JPanel controls = new JPanel();
         scaleGrid.add(plus);
         scaleGrid.add(minus);
-        controls.add(radial);
         controls.add(scaleGrid);
 
         content.add(controls, BorderLayout.SOUTH);
-    }
-
-    class Rings implements VisualizationServer.Paintable {
-
-        Collection<Double> depths;
-
-        public Rings() {
-            depths = getDepths();
-        }
-
-        private Collection<Double> getDepths() {
-            Set<Double> depths = new HashSet<Double>();
-            Map<String, PolarPoint> polarLocations = radialLayout.getPolarLocations();
-            for (String v : graph.getVertices()) {
-                PolarPoint pp = polarLocations.get(v);
-                depths.add(pp.getRadius());
-            }
-            return depths;
-        }
-
-        public void paint(Graphics g) {
-            g.setColor(Color.lightGray);
-
-            Graphics2D g2d = (Graphics2D) g;
-            Point2D center = radialLayout.getCenter();
-
-            Ellipse2D ellipse = new Ellipse2D.Double();
-            for (double d : depths) {
-                ellipse.setFrameFromDiagonal(center.getX() - d, center.getY() - d,
-                        center.getX() + d, center.getY() + d);
-                Shape shape = vv.getRenderContext().getMultiLayerTransformer().getTransformer(Layer.LAYOUT).transform(ellipse);
-                g2d.draw(shape);
-            }
-        }
-
-        public boolean useTransform() {
-            return true;
-        }
     }
 
     private static void FarmerWithBreadthFirstSearch() {

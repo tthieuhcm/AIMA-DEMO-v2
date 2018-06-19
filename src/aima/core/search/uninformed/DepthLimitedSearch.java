@@ -202,6 +202,6 @@ public class DepthLimitedSearch<S, A> implements SearchForActions<S, A>, SearchF
     }
 
     public String reduceActionName(Node<S, A> node, int level) {
-        return node.getAction().toString().split("\\[")[1].split("=")[1].split("\\]")[0] + level;
+        return node.getState().toString() + "    " + node.getAction().toString().split("\\[")[1].split("=")[1].split("\\]")[0] + "    " + level;
     }
 }

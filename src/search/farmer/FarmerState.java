@@ -104,7 +104,7 @@ public class FarmerState implements Serializable{
 	}
 	public String toString(){
 		String result = "";
-		result = "[ FAMER=" + num2String(m_state[0]) + "," +
+		result = "[ FARMER=" + num2String(m_state[0]) + "," +
 					"WOLF=" + num2String(m_state[1]) + "," +
 					"SHEEP=" + num2String(m_state[2]) + "," +
 					"CABBAGE=" + num2String(m_state[3]) + " ]";

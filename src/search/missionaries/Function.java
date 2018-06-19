@@ -116,4 +116,70 @@ public class Function {
         }
         return flag;
     }
+    
+        public static ToDoubleFunction<Node<State, Action>> createManhattanHeuristicFunction() {
+        return new ManhattanHeuristicFunction();
+    }
+
+    public static ToDoubleFunction<Node<State, Action>> createMisplacedTileHeuristicFunction() {
+        return new MisplacedTileHeuristicFunction();
+    }
+    
+    private static class ManhattanHeuristicFunction implements ToDoubleFunction<Node<State, Action>> {
+
+        @Override
+        public double applyAsDouble(Node<State, Action> node) {
+            State state = node.getState();
+            int retVal = 0;
+            for (int i = 0; i < 6; i++) {
+                int BoatPos = state.m_state[6];
+                retVal += evaluateManhattanDistanceOf(BoatPos, state.m_state[i]);
+            }
+            if (retVal == 12) retVal = 11;
+            return retVal;
+        }
+
+        private int evaluateManhattanDistanceOf(int BoatPos, int Pos) {
+            int retVal = 0;
+            //thuyền = Đông, đối tượng = Tây
+            if (BoatPos != Pos && BoatPos == State.EAST) retVal = 2;
+            //thuyền = Tây, đối tượng = Đông
+            else if (BoatPos != Pos && BoatPos == State.WEST) retVal = 0;
+            //thuyền = Tây, đối tượng = Tây
+            else if (BoatPos == Pos && BoatPos == State.WEST) retVal = 1;
+            //thuyền = Đông, đối tượng = Đông
+            return retVal;
+        }
+    }
+    
+    private  static class MisplacedTileHeuristicFunction implements ToDoubleFunction<Node<State, Action>> {
+
+        public double applyAsDouble(Node<State, Action> node) {
+            State state = (State) node.getState();
+            return getNumberOfMisplacedTiles(state);
+        }
+
+        private int getNumberOfMisplacedTiles(State state) {
+            int numberOfMisplacedTiles = 0;
+            if (state.m_state[0] != State.EAST) {
+                numberOfMisplacedTiles++;
+            }
+            if (state.m_state[1] != State.EAST) {
+                numberOfMisplacedTiles++;
+            }
+            if (state.m_state[2] != State.EAST) {
+                numberOfMisplacedTiles++;
+            }
+            if (state.m_state[3] != State.EAST) {
+                numberOfMisplacedTiles++;
+            }
+            if (state.m_state[4] != State.EAST) {
+                numberOfMisplacedTiles++;
+            }
+            if (state.m_state[5] != State.EAST) {
+                numberOfMisplacedTiles++;
+            }
+            return numberOfMisplacedTiles;
+        }
+    }
 }

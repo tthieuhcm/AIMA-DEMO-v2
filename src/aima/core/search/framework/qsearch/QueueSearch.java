@@ -85,7 +85,7 @@ public abstract class QueueSearch<S, A> {
         while (!isFrontierEmpty() && !Tasks.currIsCancelled()) {
             System.out.println("numberOfLoop = " + numberOfLoop++);
             // choose a leaf node and remove it from the frontier
-            PrintTree(root, 0);
+            //PrintTree(root, 0);
 //            System.out.println(root.getAction());
             Node<S, A> nodeToExpand = removeFromFrontier();
             //System.out.println(nodeToExpand.getState().toString());
@@ -95,7 +95,7 @@ public abstract class QueueSearch<S, A> {
             if (!earlyGoalTest && problem.testSolution(nodeToExpand)) {
                 // if the node contains a goal state then return the
                 // corresponding solution
-                saveTree(root, 0);
+                saveTree(root, "");
                 return getSolution(nodeToExpand);
             }
             // expand the chosen node, adding the resulting nodes to the
@@ -106,8 +106,8 @@ public abstract class QueueSearch<S, A> {
                 addToFrontier(successor);
                 if (earlyGoalTest && problem.testSolution(successor)) {
                     System.out.println("Result:");
-                    PrintTree(root, 0);
-                    saveTree(root, 0);
+                    //PrintTree(root, 0);
+                    saveTree(root, "");
                     return getSolution(successor);
                 }
             }
@@ -136,13 +136,13 @@ public abstract class QueueSearch<S, A> {
     public Forest<String, Integer> graph = new DelegateForest<String, Integer>();
     public int index = 0;
 
-    public void saveTree(Node<S, A> node, int level) {
+    public void saveTree(Node<S, A> node, String level) {
         if (node.getAction() != null) {
             graph.addVertex(reduceActionName(node, level));
-            if (level <10) {
+            if (level.length() < 2) {
                 graph.addEdge(index++, "INIT", reduceActionName(node, level));
             } else {
-                graph.addEdge(index++, reduceActionName(node.getParent(), level/10), reduceActionName(node, level));
+                graph.addEdge(index++, reduceActionName(node.getParent(), level.substring(0, level.length() - 2)), reduceActionName(node, level));
             }
         } else {
             graph.addVertex("INIT");
@@ -151,7 +151,8 @@ public abstract class QueueSearch<S, A> {
             int levelIndex = 0;
             for (Node<S, A> successor : node.successors) {
                 int currentIndex = levelIndex++;
-                saveTree(successor, level*10 + levelIndex);
+                if (currentIndex < 10) saveTree(successor, level + "0" + currentIndex);
+                else saveTree(successor, level + currentIndex);
             }
         }
         
@@ -171,8 +172,9 @@ public abstract class QueueSearch<S, A> {
         }
     }
 
-    public String reduceActionName(Node<S, A> node, int level) {
-        return node.getAction().toString().split("\\[")[1].split("=")[1].split("\\]")[0] + level;
+    public String reduceActionName(Node<S, A> node, String level) {
+        if (level.equals("")) return "INIT";
+        return node.getState().toString() + "    " + node.getAction().toString().split("\\[")[1].split("=")[1].split("\\]")[0] + "    " + level;
     }
 //###############################################################################################
     /**
